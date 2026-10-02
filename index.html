@@ -205,25 +205,25 @@
           </div>
           <svg id="loss-chart" viewBox="0 0 760 420" role="img" aria-label="Validation loss versus aspect ratio for 10 architectures"></svg>
           <div id="legend" class="legend" aria-label="Toggle architectures"></div>
-          <figcaption>Click an architecture to highlight it. The x-axis follows the paper: aspect ratio d / L grows from left (deeper – narrower) to right (shallower – wider). “+ extreme depth” adds the 42- and 70-layer shapes, which were trained for Pre-LN only up to L = 32 in this setting. Values are read from Figure 2.</figcaption>
+          <figcaption>Click an architecture to highlight it. The x-axis follows the paper: aspect ratio d / L grows from left (deeper – narrower) to right (shallower – wider). “+ extreme depth” adds the 42- and 70-layer shapes, which were trained for Pre-LN only up to L = 32 in this setting.</figcaption>
         </figure>
 
         <figure class="figure-card">
           <div class="figure-topline"><span class="small-label">Figure 2 · Fixed total vs. fixed backbone size</span><a href="https://arxiv.org/pdf/2609.32534" target="_blank" rel="noopener">Paper PDF ↗</a></div>
           <a class="figure-zoom" href="assets/figures/fig2.png" aria-label="Enlarge Figure 2"><img src="assets/figures/fig2.png" width="1716" height="797" loading="lazy" alt="Validation loss across aspect ratios for 10 architectures at 400M, plus extended shapes at fixed total and fixed backbone size."></a>
-          <figcaption><strong>The trend holds when the backbone size is fixed.</strong> With the backbone fixed at 300M, deep–narrow HC and Full AttnRes improve even as total size decreases — the gain comes from the width–depth allocation itself, not from a larger backbone.</figcaption>
+          <figcaption><strong>Figure 2.</strong> <strong>Left:</strong> 400M main results of validation loss across 10 architectures. <strong>Right:</strong> Validation loss across a wider range of shapes, including extreme small aspect ratios, under fixed total size (400M, top) and fixed backbone size (300M, bottom) for Pre-LN, HC and Full AttnRes.</figcaption>
         </figure>
 
         <div class="figure-stack">
           <figure class="figure-card">
             <div class="figure-topline"><span class="small-label">Figure 3 · Across scales</span></div>
             <a class="figure-zoom" href="assets/figures/fig3.png" aria-label="Enlarge Figure 3"><img src="assets/figures/fig3.png" width="1723" height="542" loading="lazy" alt="Validation loss for Pre-LN, Full AttnRes and HC across 200M–500M and at 1.6B."></a>
-            <figcaption><strong>200M → 1.6B.</strong> Full AttnRes benefits from deeper–narrower shapes at every scale, including 1.6B. HC follows at small scale but is more sensitive to optimization at larger scale.</figcaption>
+            <figcaption><strong>Figure 3.</strong> Validation loss for Pre-LN, Full AttnRes, and HC under three aspect ratios. <strong>Left:</strong> {200M, 300M, 400M, 500M} models. <strong>Right:</strong> 1.6B models.</figcaption>
           </figure>
           <figure class="figure-card">
             <div class="figure-topline"><span class="small-label">Figure 4 · Beyond pre-training loss</span></div>
             <a class="figure-zoom" href="assets/figures/fig4.png" aria-label="Enlarge Figure 4"><img src="assets/figures/fig4.png" width="1716" height="609" loading="lazy" alt="NLL on coding, STEM and math tasks across aspect ratios."></a>
-            <figcaption><strong>Code, STEM, math.</strong> Deeper HC and Full AttnRes models generally reach lower NLL, most clearly on STEM and math, while other variants show weaker or non-monotonic trends.</figcaption>
+            <figcaption><strong>Figure 4. NLL results of 400M models on Coding, STEM and Math categories.</strong> We report negative log-likelihood across model aspect ratios and architectures. Each panel shows the average NLL over two representative tasks: MBPP (Austin et al., 2021) and HumanEval (Chen et al., 2021) for <strong>coding (left)</strong>, SciQ (Welbl et al., 2017) and GPQA (Rein et al., 2023) for <strong>STEM (middle)</strong>, and GSM8K (Cobbe et al., 2021) and MATH-500 (Lightman et al., 2024) for <strong>math (right)</strong>.</figcaption>
           </figure>
         </div>
       </div>
