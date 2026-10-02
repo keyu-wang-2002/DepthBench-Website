@@ -70,7 +70,7 @@ if (stack && slider) {
   update(false);
 }
 
-// ---------- Interactive chart (values read from Figures 2 and 4 of the paper) ----------
+// ---------- Interactive chart (values read from Figures 1, 2 and 4 of the paper) ----------
 const COLORS = {
   "Pre-LN": "#2b2f36", "Full AttnRes": "#e3394a", "HC": "#7540c8", "Sandwich-LN": "#d58a00", "LNS": "#388b52",
   "DeepNorm": "#697586", "KEEL": "#b5653c", "MoDA": "#258daa", "Block AttnRes": "#578bcb", "mHC": "#c95fae",
@@ -128,6 +128,7 @@ const VIEWS = {
     x: zip([76.0, 56.0, 42.7, 34.3, 28.0, 19.1, 9.1], ["L16 · d1216", "", "", "", "L32 · d896", "L42 · d800", "L70 · d640"]),
     series: {
       "Pre-LN": zip(AR5, VAL400["Pre-LN"]),
+      "LNS": zip([76.0, 56.0, 42.7, 34.3, 28.0, 19.1], [2.749, 2.737, 2.740, 2.740, 2.739, 2.748]),  // L42 point from Figure 1
       "Full AttnRes": zip([76.0, 56.0, 42.7, 34.3, 28.0, 19.1, 9.1], [2.751, 2.728, 2.726, 2.722, 2.718, 2.708, 2.702]),
       "HC": zip([76.0, 56.0, 42.7, 34.3, 28.0, 19.1, 9.1], [2.729, 2.716, 2.702, 2.714, 2.700, 2.691, 2.682]),
     },
