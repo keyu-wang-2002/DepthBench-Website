@@ -221,8 +221,17 @@ tr.highlight td { background: var(--accent-pale); color: var(--accent-deep); fon
 .seg-group { display: flex; align-items: center; gap: 10px; }
 .seg-label { font: 600 10px/1.4 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .legend button[hidden] { display: none; }
-.chart-hint { color: var(--muted); }
-.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; margin-top: 14px; }
+.chart-hint {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: fit-content; margin: 16px auto 0;
+  padding: 7px 16px; border-radius: 18px; background: var(--accent-pale); border: 1px solid #d3e0f7;
+  font: 500 13px/1.4 var(--sans); color: var(--accent-deep);
+}
+.chart-hint svg { width: 16px; height: 16px; flex: none; }
+.chart-points { margin: 0 auto; padding-left: 20px; max-width: 860px; }
+.chart-points li + li { margin-top: 6px; }
+.legend { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 14px; }
+.legend-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; }
+.legend-row:not(:has(button:not([hidden]))) { display: none; }
 .legend button {
   display: inline-flex; align-items: center; gap: 8px;
   border: 1px solid var(--line); background: #fff; border-radius: 16px;

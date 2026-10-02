@@ -217,9 +217,14 @@
           </div>
           <svg id="loss-chart" viewBox="0 0 760 420" role="img" aria-label="Interactive chart of validation loss and downstream NLL versus aspect ratio"></svg>
           <div id="legend" class="legend" aria-label="Toggle architectures"></div>
+          <p class="chart-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V5a2 2 0 0 1 4 0v5m0-1a2 2 0 0 1 4 0v2m0-1a2 2 0 0 1 4 0v4a7 7 0 0 1-7 7h-1a7 7 0 0 1-6-3.4L4 14.5a2 2 0 0 1 3.4-2L9 15"/></svg>Click an architecture to highlight it.</p>
           <figcaption>
-            <p id="chart-note"></p>
-            <p class="chart-hint">Click an architecture to highlight it. The x-axis follows the paper: aspect ratio d / L grows from left (deeper – narrower) to right (shallower – wider).</p>
+            <ul class="chart-points">
+              <li>Pre-LN and normalization variants are largely insensitive or even unfavorable to increasingly deep–narrow shape.</li>
+              <li>HC and Full AttnRes scale favorably with depth and even surprisingly continue to improve at extremely deep shapes.</li>
+              <li>The favorable width-depth scaling behavior of HC and Full AttnRes is less evident in their derived variants, Block AttnRes and mHC.</li>
+              <li>Domain-specific evaluation shows the consistent trend.</li>
+            </ul>
           </figcaption>
         </figure>
 

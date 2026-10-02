@@ -118,12 +118,10 @@ const NLL = {
   },
 };
 const mapObj = (o, f) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, f(v, k)]));
-const NLL_NOTE = "Deeper HC and Full AttnRes models generally achieve lower NLL across coding, STEM, and math evaluations. The trend is particularly clear for STEM and math, where both architectures consistently improve as capacity is shifted toward depth. In contrast, Pre-LN and most other variants show weaker or non-monotonic trends. These results suggest that the favorable width-depth scaling translates to domain-specific predictive capability rather than only lower held-out pre-training loss.";
 const VIEWS = {
   main: {
     title: "Interactive · validation loss at ≈400M", y: "Validation loss ↓",
     x: zip(AR5, LD5), series: mapObj(VAL400, v => zip(AR5, v)),
-    note: "<strong>The favorable width-depth scaling behavior of HC and Full AttnRes is less evident in their derived variants, Block AttnRes and mHC.</strong> Block AttnRes remains competitive but performs best at an intermediate shape, reaching 2.715 at L = 20 before degrading to 2.730 at L = 32. Similarly, mHC achieves strong overall performance and its best performance at L = 24 but shows no consistent gain with increasing depth.",
   },
   ext: {
     title: "Interactive · validation loss at ≈400M, up to 70 layers", y: "Validation loss ↓",
@@ -133,7 +131,6 @@ const VIEWS = {
       "Full AttnRes": zip([76.0, 56.0, 42.7, 34.3, 28.0, 19.1, 9.1], [2.751, 2.728, 2.726, 2.722, 2.718, 2.708, 2.702]),
       "HC": zip([76.0, 56.0, 42.7, 34.3, 28.0, 19.1, 9.1], [2.729, 2.716, 2.702, 2.714, 2.700, 2.691, 2.682]),
     },
-    note: "We further extend the scaling range, up to 70 layers. The favorable trend persists, and HC and Full AttnRes are exceptionally well suited to depth scaling, with performance continuing to improve as models are pushed toward increasingly deep–narrow, even extreme, shapes. (Pre-LN was trained up to L = 32 in this setting.)",
   },
   backbone: {
     title: "Interactive · validation loss at a fixed ≈300M backbone", y: "Validation loss ↓",
@@ -143,11 +140,10 @@ const VIEWS = {
       "Full AttnRes": [[78, 2.746], [42.7, 2.726], [28, 2.718], [18.3, 2.740], [8.7, 2.739]],
       "HC": [[78, 2.721], [42.7, 2.702], [28, 2.700], [18.3, 2.697], [8.7, 2.694], [6.48, 2.719]],
     },
-    note: "Notably, with the backbone size fixed, deep–narrow models improve even as the total size decreases. This suggests that their depth-scaling gains arise from the width–depth allocation itself rather than simply from increased backbone size. Tick labels show depth and total size.",
   },
-  coding: { title: "Interactive · coding NLL at ≈400M (MBPP, HumanEval)", y: "NLL loss ↓", x: zip(AR5, LD5), series: mapObj(NLL.coding, v => zip(AR5, v)), note: NLL_NOTE },
-  stem:   { title: "Interactive · STEM NLL at ≈400M (SciQ, GPQA)",      y: "NLL loss ↓", x: zip(AR5, LD5), series: mapObj(NLL.stem,   v => zip(AR5, v)), note: NLL_NOTE },
-  math:   { title: "Interactive · math NLL at ≈400M (GSM8K, MATH-500)", y: "NLL loss ↓", x: zip(AR5, LD5), series: mapObj(NLL.math,   v => zip(AR5, v)), note: NLL_NOTE },
+  coding: { title: "Interactive · coding NLL at ≈400M (MBPP, HumanEval)", y: "NLL loss ↓", x: zip(AR5, LD5), series: mapObj(NLL.coding, v => zip(AR5, v)) },
+  stem:   { title: "Interactive · STEM NLL at ≈400M (SciQ, GPQA)",      y: "NLL loss ↓", x: zip(AR5, LD5), series: mapObj(NLL.stem,   v => zip(AR5, v)) },
+  math:   { title: "Interactive · math NLL at ≈400M (GSM8K, MATH-500)", y: "NLL loss ↓", x: zip(AR5, LD5), series: mapObj(NLL.math,   v => zip(AR5, v)) },
 };
 
 const chart = document.querySelector("#loss-chart");
@@ -169,14 +165,17 @@ if (chart) {
     };
   });
 
+  // two rows, in the legend order of Figure 2 in the paper
   const legend = document.querySelector("#legend");
+  const ROWS = [["Pre-LN", "Sandwich-LN", "LNS", "DeepNorm", "KEEL"], ["Full AttnRes", "Block AttnRes", "HC", "mHC", "MoDA"]];
+  const rowEls = ROWS.map(() => { const r = document.createElement("div"); r.className = "legend-row"; legend.appendChild(r); return r; });
   const chips = {};
-  ORDER.forEach(k => {
+  ROWS.flat().forEach(k => {
     const b = document.createElement("button");
     b.type = "button"; b.style.setProperty("--c", COLORS[k]);
     b.innerHTML = `<i></i>${k}`;
     b.addEventListener("click", () => { on[k] = !on[k]; render(); });
-    legend.appendChild(b); chips[k] = b;
+    rowEls[ROWS.findIndex(r => r.includes(k))].appendChild(b); chips[k] = b;
   });
   document.querySelectorAll(".view-switch button").forEach(b => b.addEventListener("click", () => {
     view = b.dataset.view;
@@ -191,7 +190,6 @@ if (chart) {
   function render() {
     const V = VIEWS[view];
     document.querySelector("#chart-title").textContent = V.title;
-    document.querySelector("#chart-note").innerHTML = V.note;
     yl.textContent = V.y;
     const xs = V.x.map(p => p[0]);
     const arMin = Math.min(...xs), arMax = Math.max(...xs);
