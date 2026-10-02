@@ -167,18 +167,18 @@
         <h3 class="table-title">Ten architectures, one backbone</h3>
         <div class="table-wrap">
           <table class="arch-table">
-            <thead><tr><th>Family</th><th>Method</th><th>Residual update</th><th>Weight</th><th>Reads from</th></tr></thead>
+            <thead><tr><th>Family</th><th>Method</th><th>Residual update</th><th>Weight</th><th>Source</th></tr></thead>
             <tbody>
               <tr class="group-start"><td class="fam">Baseline</td><td class="m">Pre-LN</td><td class="math">\(h_\ell = h_{\ell-1} + F_\ell(\mathrm{LN}(h_{\ell-1}))\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
               <tr class="group-start"><td class="fam" rowspan="4">LayerNorm variants</td><td class="m">Sandwich-LN</td><td class="math">\(h_\ell = h_{\ell-1} + \mathrm{LN}_\text{out}(F_\ell(\mathrm{LN}_\text{in}(h_{\ell-1})))\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
               <tr><td class="m">LNS</td><td class="math">\(h_\ell = h_{\ell-1} + F_\ell\!\left(\tfrac{1}{\sqrt{\ell}}\mathrm{LN}(h_{\ell-1})\right)\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
               <tr><td class="m">DeepNorm</td><td class="math">\(h_\ell = \mathrm{LN}(\alpha h_{\ell-1} + F_\ell(h_{\ell-1}))\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
               <tr><td class="m">KEEL</td><td class="math">\(h_\ell = \mathrm{LN}(\alpha h_{\ell-1} + F_\ell(\mathrm{LN}(h_{\ell-1})))\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
-              <tr class="group-start"><td class="fam" rowspan="2">Multi-stream residuals</td><td class="m">HC</td><td class="math">\(H_\ell = H_{\ell-1}A_\ell + F_\ell(\mathrm{LN}(H_{\ell-1}\alpha_\ell))\,\beta_\ell^\top\)</td><td>Dynamic</td><td>m residual streams</td></tr>
-              <tr><td class="m">mHC</td><td>HC with Sinkhorn-normalized (doubly stochastic) residual mixing</td><td>Dynamic</td><td>m residual streams</td></tr>
-              <tr class="group-start"><td class="fam" rowspan="3">Cross-layer access</td><td class="m">Full AttnRes</td><td class="math">\(h_\ell \propto \sum_{i=0}^{\ell-1}\phi(w_\ell, v_i)\,v_i\)</td><td>Dynamic</td><td class="math">\([h_1,\dots,h_{\ell-1}]\)</td></tr>
-              <tr><td class="m">Block AttnRes</td><td>Attention over saved block outputs plus the running block sum</td><td>Dynamic</td><td>block outputs</td></tr>
-              <tr><td class="m">MoDA</td><td class="math">\(h_\ell = h_{\ell-1} + \mathrm{MoDA}_\ell(\mathrm{LN}(h_{\ell-1}); C_{&lt;\ell})\)</td><td>Dynamic</td><td>earlier-layer KV</td></tr>
+              <tr class="group-start"><td class="fam" rowspan="2">Multi-stream residuals</td><td class="m">HC</td><td class="math">\(H_\ell = H_{\ell-1}A_\ell + F_\ell(\mathrm{LN}(H_{\ell-1}\alpha_\ell))\,\beta_\ell^\top\)</td><td>Dynamic</td><td class="math">\(m\) residual streams</td></tr>
+              <tr><td class="m">mHC</td><td class="math">\(H_\ell = H_{\ell-1}\,\mathrm{Sinkhorn}(\widetilde{A}_\ell) + F_\ell(\mathrm{LN}(H_{\ell-1}\,\sigma(\widetilde{\alpha}_\ell)))\,2\sigma(\widetilde{\beta}_\ell^{\top})\)</td><td>Dynamic</td><td class="math">\(m\) residual streams</td></tr>
+              <tr class="group-start"><td class="fam" rowspan="3">Cross-layer access</td><td class="m">Full AttnRes</td><td class="math">\(h_\ell \propto \sum_{i=0}^{\ell-1}\phi(w_\ell, v_i)\,v_i,\quad v_0 = h_1,\ v_{i\ge 1} = f_i(h_i)\)</td><td>Dynamic</td><td class="math">\([h_1,\dots,h_{\ell-1}]\)</td></tr>
+              <tr><td class="m">Block AttnRes</td><td class="math">\(h_\ell \propto \sum_{i=0}^{n-1}\phi(w_\ell, v_i)\,v_i + \phi(w_\ell, v_n^{j})\,v_n^{j}\)</td><td>Dynamic</td><td class="math">\([v_0,\dots,v_{n-1}, v_n^{j}]\)</td></tr>
+              <tr><td class="m">MoDA (Pre-LN)</td><td class="math">\(h_\ell = h_{\ell-1} + \mathrm{MoDA}_\ell(\mathrm{LN}(h_{\ell-1}); \mathcal{C}_{&lt;\ell})\)</td><td>Dynamic</td><td class="math">\(\left[h_{\ell-1,\le t};\, h_{0,t},\dots,h_{\ell-2,t}\right]\)</td></tr>
             </tbody>
           </table>
         </div>
