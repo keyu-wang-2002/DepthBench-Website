@@ -139,10 +139,8 @@ h1 em { color: var(--accent); font-weight: 500; }
 .figure-topline .small-label { color: var(--muted); font-size: 10px; letter-spacing: .1em; }
 .figure-topline > a { font: 11px/1.5 var(--sans); white-space: nowrap; color: var(--muted); }
 .figure-zoom { display: block; cursor: zoom-in; border-radius: 3px; }
-.figure-zoom img, .teaser-video, .video-card video { display: block; width: 100%; height: auto; }
+.figure-zoom img, .teaser-video { display: block; width: 100%; height: auto; }
 .teaser-video { border-radius: 6px; background: var(--paper); aspect-ratio: 2400 / 1060; }
-.video-card { padding: 14px; }
-.video-card video { border-radius: 6px; background: #f2f4f8; aspect-ratio: 16 / 9; }
 figcaption { color: var(--soft); font: 13px/1.7 var(--sans); margin: 20px auto 0; max-width: 860px; }
 figcaption strong { color: var(--ink); }
 
