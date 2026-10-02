@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DepthBench — Measuring How Residual Connections Enable More Computational Depth</title>
+  <meta name="description" content="DepthBench is a controlled benchmark for computational depth: 10 residual and normalization designs, trained from shallow–wide to deep–narrow shapes at a fixed parameter budget.">
+  <meta name="theme-color" content="#3063ca">
+  <meta property="og:title" content="DepthBench: Measuring How Residual Connections Enable More Computational Depth">
+  <meta property="og:description" content="At a fixed parameter budget, going deeper hurts Pre-LN but keeps helping HC and Full AttnRes — down to 70 layers.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="assets/figures/fig1.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="hero" id="top">
+    <div class="container">
+      <a class="eyebrow" href="https://arxiv.org/abs/2609.32534" target="_blank" rel="noopener">Technical Report <span>·</span> arXiv 2609.32534</a>
+      <div class="brandline"><img src="assets/logo.svg" alt="" width="54" height="60"><span>Depth<b>Bench</b></span></div>
+      <h1>Measuring How Residual Connections<br class="desktop-break"> Enable More <em>Computational Depth</em></h1>
+      <p class="subtitle">Which architectural designs make additional depth computationally effective?<br class="desktop-break"> A controlled benchmark of 10 residual designs at a fixed parameter budget.</p>
+      <p class="authors">
+        <span>Keyu Wang<sup>1,2,3*</sup></span><span>Yangyi Huang<sup>4*</sup></span><span>Jiale Kang<sup>4</sup></span>
+        <span>David González-Martínez<sup>1,2,3</sup></span><span>Weiyang Liu<sup>4</sup></span><span>Shiwei Liu<sup>1,2,3</sup></span>
+      </p>
+      <p class="affiliations">
+        <span><sup>1</sup>ELLIS Institute Tübingen</span><span><sup>2</sup>Max Planck Institute for Intelligent Systems</span>
+        <span><sup>3</sup>Tübingen AI Center</span><span><sup>4</sup>The Chinese University of Hong Kong</span>
+      </p>
+      <p class="author-note">* Equal contribution</p>
+      <div class="resource-links" aria-label="Project resources">
+        <a class="button primary" href="https://arxiv.org/abs/2609.32534" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"/></svg>Paper</a>
+        <a class="button" href="https://github.com/keyu-wang-2002/DepthBench" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18"/></svg>Code</a>
+        <a class="button" href="https://huggingface.co/aspect-ratio-scaling" target="_blank" rel="noopener"><span class="emoji" aria-hidden="true">🤗</span>Checkpoints</a>
+        <a class="button" href="#video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v16l14-8z"/></svg>Video</a>
+        <a class="button" href="#citation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H4v7h5v7H3m18-14h-5v7h5v7h-6"/></svg>BibTeX</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="section-nav" aria-label="Sections">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#top"><img src="assets/logo.svg" alt="" width="20" height="22"><span>Depth<b>Bench</b></span></a>
+      <div class="nav-links">
+        <a href="#overview">Overview</a><a href="#findings">Findings</a><a href="#benchmark">Benchmark</a>
+        <a href="#results">Results</a><a href="#analysis">Analysis</a><a href="#efficiency">Efficiency</a><a href="#citation">Citation</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <div class="container teaser">
+      <figure class="figure-card">
+        <div class="figure-topline"><span class="small-label">DepthBench at a glance</span><a href="assets/media/depthbench-short.mp4" target="_blank" rel="noopener">Open video ↗</a></div>
+        <video class="teaser-video" src="assets/media/depthbench-short.mp4" poster="assets/media/short-poster.jpg" autoplay muted loop playsinline aria-label="Animation: a model morphs from 16 wide layers to 70 narrow layers at ≈400M parameters while validation-loss curves are drawn for Pre-LN, Full AttnRes and HC."></video>
+        <figcaption><strong>Same parameters, different shape.</strong> Trading width for depth at ≈400M parameters, Pre-LN gets worse as the model becomes deeper and narrower, while HC and Full AttnRes keep improving — all the way to 70 layers.</figcaption>
+      </figure>
+      <div class="study-strip">
+        <div><strong>10</strong><span>residual &amp; norm designs</span></div>
+        <div><strong>25</strong><span>model shapes</span></div>
+        <div><strong>200M – 1.6B</strong><span>model scales</span></div>
+        <div><strong>160+</strong><span>open checkpoints</span></div>
+      </div>
+    </div>
+
+    <section id="overview">
+      <div class="narrow">
+        <p class="section-label">Abstract</p>
+        <h2>More layers.<br>But more computation?</h2>
+        <div class="tldr">
+          <span class="small-label">TL;DR</span>
+          <p>At a fixed parameter budget, making Transformers deeper and narrower hurts Pre-LN and most of its normalization variants, but consistently helps <strong>HC and Full AttnRes</strong> — even at 70 layers. Residual connection design decides whether depth is a real scaling axis.</p>
+        </div>
+        <p>Depth is a natural way to increase the computational capacity of Transformers, yet the contribution of deeper layers can diminish as depth grows larger. Recent approaches enhance normalization (e.g., LayerNorm Scaling) or residual connections (e.g., mHC, AttnRes) to enable better information flow and depth utilization. However, it remains unclear whether they truly translate increased architectural depth into effective computational depth, and whether their reported gains stem from better access to information across depth, or from unaccounted-for confounding factors.</p>
+        <p>We introduce <strong>DepthBench</strong>, a controlled benchmark for studying computational depth across architectures. We systematically vary the width–depth aspect ratio (<span class="math">\(d_\text{model}/n_\text{layer}\)</span>) from shallow–wide to deep–narrow shapes, while keeping the model size and pre-training recipe fixed.</p>
+        <p>Across 10 representative architectures, the benefit of allocating more capacity to depth is <strong>strongly architecture-dependent</strong>. Standard Pre-LN and most of its norm- and scaling-based variants provide little benefit and can even degrade as models become deeper and narrower, whereas HC and Full AttnRes improve consistently even at extreme deep shapes. These gains extend beyond pre-training loss to domain-specific evaluations, and controlled layer-level analyses show they are associated with more effective utilization of additional layers.</p>
+        <p>Overall, our results identify residual connection design as a key determinant of whether depth can serve as a meaningful scaling axis.</p>
+      </div>
+    </section>
+
+    <section id="video" class="soft-section">
+      <div class="container">
+        <p class="section-label">Overview video</p>
+        <h2>DepthBench in 90 seconds.</h2>
+        <figure class="figure-card video-card">
+          <video src="assets/media/depthbench-overview.mp4" poster="assets/media/overview-poster.jpg" controls preload="none" playsinline aria-label="DepthBench overview video"></video>
+        </figure>
+      </div>
+    </section>
+
+    <section id="findings">
+      <div class="container">
+        <p class="section-label">Key findings</p>
+        <h2>Depth pays off — with the right residual connection.</h2>
+        <div class="finding-grid">
+          <article class="finding">
+            <span class="finding-number">01 / BASELINE</span>
+            <h3>Pre-LN does not benefit from depth.</h3>
+            <p>Pre-LN and its normalization variants stay flat or get worse as capacity shifts to depth. Their optima sit at large aspect ratios of 42.7–76.0.</p>
+            <a href="#results">See the main results <span>↗</span></a>
+          </article>
+          <article class="finding">
+            <span class="finding-number">02 / NEW RESIDUALS</span>
+            <h3>HC &amp; Full AttnRes keep improving.</h3>
+            <p>Both get better as models become deeper and narrower, even at an extreme aspect ratio of 9.1 (<span class="nowrap">d = 640</span>, <span class="nowrap">L = 70</span>). Gains carry over to code, STEM and math.</p>
+            <a href="#results">Explore the curves <span>↗</span></a>
+          </article>
+          <article class="finding">
+            <span class="finding-number">03 / MECHANISM</span>
+            <h3>Late layers stay consequential.</h3>
+            <p>Their representations keep changing in a layer-specific way, with far stronger cross-layer dependence and order sensitivity than Pre-LN.</p>
+            <a href="#analysis">See the layer analysis <span>↗</span></a>
+          </article>
+          <article class="finding">
+            <span class="finding-number">04 / COST</span>
+            <h3>No free lunch.</h3>
+            <p>Even at fixed parameters, deeper shapes raise prefill FLOPs, KV cache and wall-clock cost. Realizing the gains needs architecture–system co-design.</p>
+            <a href="#efficiency">See the trade-off <span>↗</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="benchmark" class="soft-section">
+      <div class="container">
+        <div class="reading-width">
+          <p class="section-label">Benchmark design</p>
+          <h2>Same parameters. Different width–depth aspect ratios.</h2>
+          <p>Simply adding layers at a fixed width also adds parameters and compute, confounding depth with scale. DepthBench instead treats depth as a <strong>capacity-allocation choice</strong>: for each depth we pick the width that keeps the parameter budget matched, then train every architecture on the same data with the same recipe.</p>
+        </div>
+
+        <div class="shape-demo" aria-label="Interactive illustration of the 400M model shapes">
+          <div class="small-label">Explore the 400M shapes</div>
+          <div class="shape-body">
+            <svg id="shape-stack" viewBox="0 0 360 240" role="img" aria-label="Layer stack of the selected model shape"></svg>
+            <div class="shape-stats">
+              <div><span>Layers</span><strong id="sh-L">24</strong></div>
+              <div><span>Hidden d</span><strong id="sh-d">1024</strong></div>
+              <div><span>Aspect ratio d / L</span><strong id="sh-ar" class="accent">42.67</strong></div>
+              <div><span>FFN dim</span><strong id="sh-ff">2736</strong></div>
+              <div><span>Head dim</span><strong id="sh-hd">64</strong></div>
+              <div><span>Total size</span><strong id="sh-tot">405M</strong></div>
+            </div>
+          </div>
+          <div class="slider-row">
+            <span class="slider-end">deeper · narrower</span>
+            <input id="shape-slider" type="range" min="0" max="6" step="1" value="4" aria-label="Model shape">
+            <span class="slider-end">shallower · wider</span>
+          </div>
+          <p class="demo-note">Values from Table 3 of the paper (16 attention heads; total size within ±3% of 405M). Drag to compare shapes.</p>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <h3>Controlled pre-training</h3>
+            <p>All models are trained from scratch with OLMo-core on FineWeb-Edu at 20 tokens per parameter (8B tokens at 400M, 32B at 1.6B), with sequence length 2048 and ~1M-token batches. Learning rates are swept per architecture and each configuration is reported at its best learning rate.</p>
+          </div>
+          <div>
+            <h3>Four experimental suites</h3>
+            <p><strong>Main benchmark</strong> at ≈400M total (7 shapes, d/L 9.1–76.0); an <strong>iso-backbone</strong> control at ≈300M backbone; a <strong>multi-scale</strong> suite from 200M to 500M; and <strong>validation at 1.6B</strong> with a Qwen3-style GQA backbone.</p>
+          </div>
+        </div>
+
+        <div class="formula-box">
+          <p class="small-label">Why depth costs width</p>
+          <div class="math-display">\[ N \;\approx\; 12\,L\,d^2 \;+\; 2\,V d \]</div>
+          <p class="formula-note">With the budget <span class="math">\(N\)</span> held fixed, more layers <span class="math">\(L\)</span> force a smaller hidden size <span class="math">\(d\)</span>.</p>
+        </div>
+
+        <h3 class="table-title">Ten architectures, one backbone</h3>
+        <div class="table-wrap">
+          <table class="arch-table">
+            <thead><tr><th>Family</th><th>Method</th><th>Residual update</th><th>Weight</th><th>Reads from</th></tr></thead>
+            <tbody>
+              <tr class="group-start"><td class="fam">Baseline</td><td class="m">Pre-LN</td><td class="math">\(h_\ell = h_{\ell-1} + F_\ell(\mathrm{LN}(h_{\ell-1}))\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
+              <tr class="group-start"><td class="fam" rowspan="4">LayerNorm variants</td><td class="m">Sandwich-LN</td><td class="math">\(h_\ell = h_{\ell-1} + \mathrm{LN}_\text{out}(F_\ell(\mathrm{LN}_\text{in}(h_{\ell-1})))\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
+              <tr><td class="m">LNS</td><td class="math">\(h_\ell = h_{\ell-1} + F_\ell\!\left(\tfrac{1}{\sqrt{\ell}}\mathrm{LN}(h_{\ell-1})\right)\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
+              <tr><td class="m">DeepNorm</td><td class="math">\(h_\ell = \mathrm{LN}(\alpha h_{\ell-1} + F_\ell(h_{\ell-1}))\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
+              <tr><td class="m">KEEL</td><td class="math">\(h_\ell = \mathrm{LN}(\alpha h_{\ell-1} + F_\ell(\mathrm{LN}(h_{\ell-1})))\)</td><td>Fixed</td><td class="math">\(h_{\ell-1}\)</td></tr>
+              <tr class="group-start"><td class="fam" rowspan="2">Multi-stream residuals</td><td class="m">HC</td><td class="math">\(H_\ell = H_{\ell-1}A_\ell + F_\ell(\mathrm{LN}(H_{\ell-1}\alpha_\ell))\,\beta_\ell^\top\)</td><td>Dynamic</td><td>m residual streams</td></tr>
+              <tr><td class="m">mHC</td><td>HC with Sinkhorn-normalized (doubly stochastic) residual mixing</td><td>Dynamic</td><td>m residual streams</td></tr>
+              <tr class="group-start"><td class="fam" rowspan="3">Cross-layer access</td><td class="m">Full AttnRes</td><td class="math">\(h_\ell \propto \sum_{i=0}^{\ell-1}\phi(w_\ell, v_i)\,v_i\)</td><td>Dynamic</td><td class="math">\([h_1,\dots,h_{\ell-1}]\)</td></tr>
+              <tr><td class="m">Block AttnRes</td><td>Attention over saved block outputs plus the running block sum</td><td>Dynamic</td><td>block outputs</td></tr>
+              <tr><td class="m">MoDA</td><td class="math">\(h_\ell = h_{\ell-1} + \mathrm{MoDA}_\ell(\mathrm{LN}(h_{\ell-1}); C_{&lt;\ell})\)</td><td>Dynamic</td><td>earlier-layer KV</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="container">
+        <div class="reading-width">
+          <p class="section-label">01 / Main results</p>
+          <h2>Whether depth helps depends on the residual connection.</h2>
+          <p>For Pre-LN, validation loss <strong>monotonically increases</strong> from 2.759 at L = 16 to 2.782 at L = 32: reallocating parameters from width to depth hurts. Sandwich-LN, LNS, DeepNorm, KEEL and MoDA show either weak or non-monotonic trends, with their optima at intermediate or shallower shapes.</p>
+          <p>HC and Full AttnRes do the opposite. Full AttnRes steadily improves from <strong>2.751 to 2.718</strong>, and HC from <strong>2.729 to 2.700</strong>. Pushed further, both keep improving: at 70 layers (d = 640), HC reaches <strong>2.682</strong> and Full AttnRes <strong>2.702</strong>.</p>
+        </div>
+
+        <div class="stat-row">
+          <div><strong>+0.023</strong><span>Pre-LN loss, L16 → L32</span></div>
+          <div><strong>−0.033</strong><span>Full AttnRes loss, L16 → L32</span></div>
+          <div><strong>2.682</strong><span>HC at 70 layers (d/L = 9.1)</span></div>
+        </div>
+
+        <figure class="figure-card chart-card">
+          <div class="figure-topline">
+            <span class="small-label">Interactive · validation loss at ≈400M</span>
+            <div class="seg" role="group" aria-label="Range of shapes">
+              <button type="button" data-range="main" aria-pressed="true">L16 – L32</button>
+              <button type="button" data-range="ext" aria-pressed="false">+ extreme depth</button>
+            </div>
+          </div>
+          <svg id="loss-chart" viewBox="0 0 1040 420" role="img" aria-label="Validation loss versus aspect ratio for 10 architectures"></svg>
+          <div id="legend" class="legend" aria-label="Toggle architectures"></div>
+          <figcaption>Click an architecture to highlight it. The x-axis follows the paper: aspect ratio d / L grows from left (deeper – narrower) to right (shallower – wider). “+ extreme depth” adds the 42- and 70-layer shapes, which were trained for Pre-LN only up to L = 32 in this setting. Values are read from Figure 2.</figcaption>
+        </figure>
+
+        <figure class="figure-card">
+          <div class="figure-topline"><span class="small-label">Figure 2 · Fixed total vs. fixed backbone size</span><a href="https://arxiv.org/pdf/2609.32534" target="_blank" rel="noopener">Paper PDF ↗</a></div>
+          <a class="figure-zoom" href="assets/figures/fig2.png" aria-label="Enlarge Figure 2"><img src="assets/figures/fig2.png" width="1716" height="797" loading="lazy" alt="Validation loss across aspect ratios for 10 architectures at 400M, plus extended shapes at fixed total and fixed backbone size."></a>
+          <figcaption><strong>The trend holds when the backbone size is fixed.</strong> With the backbone fixed at 300M, deep–narrow HC and Full AttnRes improve even as total size decreases — the gain comes from the width–depth allocation itself, not from a larger backbone.</figcaption>
+        </figure>
+
+        <div class="figure-stack">
+          <figure class="figure-card">
+            <div class="figure-topline"><span class="small-label">Figure 3 · Across scales</span></div>
+            <a class="figure-zoom" href="assets/figures/fig3.png" aria-label="Enlarge Figure 3"><img src="assets/figures/fig3.png" width="1723" height="542" loading="lazy" alt="Validation loss for Pre-LN, Full AttnRes and HC across 200M–500M and at 1.6B."></a>
+            <figcaption><strong>200M → 1.6B.</strong> Full AttnRes benefits from deeper–narrower shapes at every scale, including 1.6B. HC follows at small scale but is more sensitive to optimization at larger scale.</figcaption>
+          </figure>
+          <figure class="figure-card">
+            <div class="figure-topline"><span class="small-label">Figure 4 · Beyond pre-training loss</span></div>
+            <a class="figure-zoom" href="assets/figures/fig4.png" aria-label="Enlarge Figure 4"><img src="assets/figures/fig4.png" width="1716" height="609" loading="lazy" alt="NLL on coding, STEM and math tasks across aspect ratios."></a>
+            <figcaption><strong>Code, STEM, math.</strong> Deeper HC and Full AttnRes models generally reach lower NLL, most clearly on STEM and math, while other variants show weaker or non-monotonic trends.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="analysis" class="soft-section">
+      <div class="container">
+        <div class="reading-width">
+          <p class="section-label">02 / Depth utilization</p>
+          <h2>Their late layers keep doing distinct work.</h2>
+          <h3>Representation diversity</h3>
+          <p>We measure the angular distance between the outputs of layer ℓ and layer ℓ + n. In Pre-LN and its normalization variants, deep-layer representations become <strong>smooth and increasingly similar</strong>. HC and AttnRes keep changing in a layer-specific, non-uniform way.</p>
+        </div>
+        <div class="formula-box">
+          <p class="small-label">Angular distance</p>
+          <div class="math-display">\[ d(h_\ell, h_{\ell+n}) = \frac{1}{\pi}\arccos\!\left(\frac{h_\ell\cdot h_{\ell+n}}{\lVert h_\ell\rVert_2\,\lVert h_{\ell+n}\rVert_2}\right) \]</div>
+        </div>
+        <figure class="figure-card">
+          <div class="figure-topline"><span class="small-label">Figure 5 · Angular distance, L = 32</span><a href="https://arxiv.org/pdf/2609.32534" target="_blank" rel="noopener">Paper PDF ↗</a></div>
+          <a class="figure-zoom" href="assets/figures/fig5.png" aria-label="Enlarge Figure 5"><img src="assets/figures/fig5.png" width="1716" height="1253" loading="lazy" alt="Angular distance heatmaps for nine architectures."></a>
+          <figcaption><strong>Yellow means little change.</strong> Pre-LN-style models drift toward small refinements of the same representation; HC, mHC and AttnRes preserve heterogeneous, layer-specific transformations. Block AttnRes changes sharply across block boundaries.</figcaption>
+        </figure>
+
+        <div class="reading-width spaced">
+          <h3>Layer perturbation</h3>
+          <p>Does each late layer matter? The <strong>causal score</strong> measures how much skipping layer s changes the update of a later layer ℓ; the <strong>permutation score</strong> measures how much the loss degrades when two layers are swapped. We count how often pairs in the last three quarters of the network exceed a threshold.</p>
+        </div>
+        <div class="formula-box two">
+          <div>
+            <p class="small-label">Causal score</p>
+            <div class="math-display">\[ C(s,\ell)=\frac{\lVert (h_{\ell+1}-h_\ell)-(\bar h_{\ell+1}-\bar h_\ell)\rVert_2}{\lVert h_{\ell+1}-h_\ell\rVert_2} \]</div>
+          </div>
+          <div>
+            <p class="small-label">Permutation score</p>
+            <div class="math-display">\[ P(\ell_1,\ell_2)=\frac{\lvert \mathcal{L}(M)-\mathcal{L}(M_{\text{swap}(\ell_1,\ell_2)})\rvert}{\mathcal{L}(M)} \]</div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-head">Late-layer pairs above threshold · L = 32 models</div>
+          <table>
+            <thead><tr><th>Architecture</th><th class="num">Causal score &gt; 0.45</th><th class="num">Permutation score &gt; 0.15</th></tr></thead>
+            <tbody>
+              <tr><td>Pre-LN</td><td class="num">≈ 1%</td><td class="num">≈ 8%</td></tr>
+              <tr class="highlight"><td>HC</td><td class="num">≈ 7%</td><td class="num">≈ 35%</td></tr>
+              <tr class="highlight"><td>Full AttnRes</td><td class="num">≈ 16%</td><td class="num">≈ 46%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figure class="figure-card">
+          <div class="figure-topline"><span class="small-label">Figure 6 · Causal and permutation scores</span><a href="https://arxiv.org/pdf/2609.32534" target="_blank" rel="noopener">Paper PDF ↗</a></div>
+          <a class="figure-zoom" href="assets/figures/fig6.png" aria-label="Enlarge Figure 6"><img src="assets/figures/fig6.png" width="1716" height="868" loading="lazy" alt="Fractions of late-layer pairs above causal and permutation thresholds, with pairwise score maps."></a>
+          <figcaption><strong>Coupled, not interchangeable.</strong> Pre-LN, most normalization variants and MoDA show few strong late-layer interactions. HC and Full AttnRes show much stronger cross-layer dependence and order sensitivity.</figcaption>
+        </figure>
+
+        <div class="reading-width spaced">
+          <h3>Two routes to effective depth</h3>
+          <p>Full AttnRes forms a normalized mixture over the embedding and all earlier sublayer outputs, so it <strong>directly retrieves</strong> stored computations. HC realizes cross-depth access recursively, <strong>propagating and recombining</strong> earlier outputs through interacting residual streams.</p>
+        </div>
+        <figure class="figure-card">
+          <div class="figure-topline"><span class="small-label">Figure 7 · Explicit residual-path weights</span></div>
+          <a class="figure-zoom" href="assets/figures/fig7.png" aria-label="Enlarge Figure 7"><img src="assets/figures/fig7.png" width="1716" height="539" loading="lazy" alt="Residual path weight maps for Pre-LN, Full AttnRes and HC."></a>
+          <figcaption>Each cell is the mixing weight of sublayer output <span class="math">\(f_i\)</span> in the input of a later sublayer <span class="math">\(\ell\)</span>. Pre-LN weights every earlier output equally; Full AttnRes and HC learn structured, long-range routes.</figcaption>
+        </figure>
+        <figure class="figure-card">
+          <div class="figure-topline"><span class="small-label">Figure 8 · Layer pruning and LogitLens</span></div>
+          <a class="figure-zoom" href="assets/figures/fig8.png" aria-label="Enlarge Figure 8"><img src="assets/figures/fig8.png" width="1716" height="531" loading="lazy" alt="Performance drop after removing single layers, and KL divergence between intermediate and final predictions."></a>
+          <figcaption>Full AttnRes is sensitive to pruning across a broader range of layers and approaches its final prediction non-monotonically, consistent with continued retrieval and late integration of earlier sources.</figcaption>
+        </figure>
+
+        <details class="disclosure">
+          <summary>Why do Block AttnRes and mHC lose the depth benefit? <span aria-hidden="true">+</span></summary>
+          <div class="disclosure-body">
+            <p><strong>Block AttnRes.</strong> Before the first block output is saved, the depth-mixing softmax gives almost no weight to the running sum, so early layers keep re-reading the embedding. This dead segment grows with depth (2, 5 and 8 layers at L = 16, 24, 32) — a quarter of the 32-layer network cannot benefit from stacking layers.</p>
+            <figure class="figure-card"><a class="figure-zoom" href="assets/figures/fig9.png" aria-label="Enlarge Figure 9"><img src="assets/figures/fig9.png" width="1716" height="445" loading="lazy" alt="Block AttnRes depth-mixing weights at L = 16, 24, 32."></a></figure>
+            <p><strong>mHC.</strong> Sinkhorn normalization makes residual maps nearly doubly stochastic, and repeated mixing contracts toward the uniform matrix. The composed residual products have lower effective rank (1.44–1.65 vs. 2.53–2.81 for HC), and stream directions become nearly collinear at L = 32 — stabilizing transport at the cost of diverse long-range routes.</p>
+            <figure class="figure-card"><a class="figure-zoom" href="assets/figures/fig10.png" aria-label="Enlarge Figure 10"><img src="assets/figures/fig10.png" width="1716" height="541" loading="lazy" alt="Effective rank, direction overlap and singular spectrum of residual transport in HC and mHC."></a></figure>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="efficiency">
+      <div class="container">
+        <div class="reading-width">
+          <p class="section-label">03 / No free lunch</p>
+          <h2>Depth costs systems efficiency — even at fixed parameters.</h2>
+          <p>With <span class="math">\(N \approx 12Ld^2 + 2Vd\)</span>, the dominant <span class="math">\(Ld^2\)</span> projection cost stays roughly constant as depth grows, but terms proportional to <span class="math">\(Ld\)</span> — attention prefill <span class="math">\(\mathcal{O}(T^2Ld)\)</span> and KV cache <span class="math">\(\mathcal{O}(TLd)\)</span> — increase. Deeper models also run more sequential, smaller matrix multiplications at lower hardware utilization.</p>
+        </div>
+        <div class="stat-row">
+          <div><strong>3.0 → 4.4</strong><span>prefill TFLOPs / sequence, d/L 76 → 9.1</span></div>
+          <div><strong>&gt; 2×</strong><span>KV cache, identical across architectures</span></div>
+          <div><strong>Sharp rise</strong><span>peak memory and GPU-hours at the deepest shapes</span></div>
+        </div>
+        <figure class="figure-card">
+          <div class="figure-topline"><span class="small-label">Figure 11 · Measured prefill cost (T = 4096, A100)</span><a href="https://arxiv.org/pdf/2609.32534" target="_blank" rel="noopener">Paper PDF ↗</a></div>
+          <a class="figure-zoom" href="assets/figures/fig11.png" aria-label="Enlarge Figure 11"><img src="assets/figures/fig11.png" width="1716" height="418" loading="lazy" alt="Prefill FLOPs, KV cache, peak memory and GPU-hours across aspect ratios."></a>
+          <figcaption><strong>Better models, higher cost.</strong> Full AttnRes has the largest peak-memory footprint; HC shows the highest measured GPU-hours despite similar nominal FLOPs. Realizing deep-model gains at scale calls for architecture–system co-design.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="takeaway-section">
+      <div class="narrow">
+        <div class="takeaway">
+          <p class="small-label">So the bigger picture is</p>
+          <p class="takeaway-text">🚀 Depth is an underexplored and promising scaling axis&nbsp;— but only with the correct residual connections, and system-level design is badly needed to fulfill it in practice.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="resources" class="soft-section">
+      <div class="container">
+        <p class="section-label">Resources</p>
+        <h2>Train, probe and evaluate.</h2>
+        <div class="resource-grid">
+          <a class="resource" href="https://arxiv.org/abs/2609.32534" target="_blank" rel="noopener"><span class="resource-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"/></svg></span><strong>Paper</strong><span>arXiv:2609.32534</span></a>
+          <a class="resource" href="https://github.com/keyu-wang-2002/DepthBench" target="_blank" rel="noopener"><span class="resource-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18"/></svg></span><strong>Code</strong><span>11 architectures, 25 shapes, depth probes on native OLMo-core checkpoints</span></a>
+          <a class="resource" href="https://huggingface.co/aspect-ratio-scaling" target="_blank" rel="noopener"><span class="resource-icon emoji-icon">🤗</span><strong>Checkpoints</strong><span>160+ pre-trained models from 200M to 1.6B</span></a>
+        </div>
+        <div class="code-card">
+          <div class="code-head">Download a checkpoint and run a depth probe</div>
+<pre><code>huggingface-cli download aspect-ratio-scaling/preln-lr2e-3-llama-400M-L24-pretrain \
+  --local-dir ckpt/hf/preln-400M-L24
+
+python analysis/compute_angular_distance.py --model_path ckpt/hf/preln-400M-L24 \
+  --output_dir results/angular --token-data-glob "data/fineweb-edu/pre-tokenize/eval/*.npy"</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="citation">
+      <div class="container">
+        <p class="section-label">Citation</p>
+        <h2>BibTeX</h2>
+        <div class="bibtex-card">
+          <button id="copy-citation" type="button">Copy citation</button>
+<pre id="bibtex">@misc{depthbench2026,
+  title         = {{DepthBench}: Measuring How Residual Connections Enable More Computational Depth},
+  author        = {Wang, Keyu and Huang, Yangyi and Kang, Jiale and Gonz{\'a}lez-Mart{\'\i}nez, David and Liu, Weiyang and Liu, Shiwei},
+  year          = {2026},
+  eprint        = {2609.32534},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2609.32534}
+}</pre>
+          <p id="copy-status" class="copy-status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a class="nav-brand" href="#top"><img src="assets/logo.svg" alt="" width="20" height="22"><span>Depth<b>Bench</b></span></a>
+      <p>ELLIS Institute Tübingen · MPI-IS · Tübingen AI Center · CUHK. Built on <a href="https://github.com/allenai/OLMo-core" target="_blank" rel="noopener">OLMo-core</a>.</p>
+    </div>
+  </footer>
+
+  <dialog id="figure-dialog" aria-labelledby="figure-dialog-title">
+    <div class="dialog-bar"><span id="figure-dialog-title"></span><button type="button" id="dialog-close" aria-label="Close">✕</button></div>
+    <div class="dialog-image-wrap"><img id="expanded-figure" alt=""></div>
+  </dialog>
+</body>
+</html>
