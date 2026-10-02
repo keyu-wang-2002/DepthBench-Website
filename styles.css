@@ -143,6 +143,7 @@ h1 em { color: var(--accent); font-weight: 500; }
 .teaser-video { border-radius: 6px; background: var(--paper); aspect-ratio: 2400 / 1060; }
 figcaption { color: var(--soft); font: 13px/1.7 var(--sans); margin: 20px auto 0; max-width: 860px; }
 figcaption strong { color: var(--ink); }
+figcaption p + p { margin-top: 10px; }
 
 .study-strip { display: grid; grid-template-columns: repeat(4, 1fr); padding: 30px 0 33px; border-bottom: 1px solid var(--line); text-align: center; }
 .study-strip > div + div { border-left: 1px solid var(--line); }
