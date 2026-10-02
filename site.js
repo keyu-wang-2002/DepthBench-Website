@@ -87,7 +87,7 @@ const ARCHS = [
 ];
 const chart = document.querySelector("#loss-chart");
 if (chart) {
-  const X0 = 70, X1 = 900, Y0 = 18, Y1 = 330;
+  const X0 = 70, X1 = 620, Y0 = 18, Y1 = 330;
   let range = "main";
   const gGrid = el("g", {}, chart), gLines = el("g", {}, chart), gTop = el("g", {}, chart);
   el("text", { x: 18, y: (Y0 + Y1) / 2, class: "axis-label", transform: `rotate(-90 18 ${(Y0 + Y1) / 2})`, "text-anchor": "middle", stroke: "none" }, chart).textContent = "Validation loss ↓";

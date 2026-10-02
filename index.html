@@ -191,14 +191,9 @@
           <p class="section-label">01 / Main results</p>
           <h2>Whether depth helps depends on the residual connection.</h2>
           <p>For Pre-LN, validation loss <strong>monotonically increases</strong> from 2.759 at L = 16 to 2.782 at L = 32: reallocating parameters from width to depth hurts. Sandwich-LN, LNS, DeepNorm, KEEL and MoDA show either weak or non-monotonic trends, with their optima at intermediate or shallower shapes.</p>
-          <p>HC and Full AttnRes do the opposite. Full AttnRes steadily improves from <strong>2.751 to 2.718</strong>, and HC from <strong>2.729 to 2.700</strong>. Pushed further, both keep improving: at 70 layers (d = 640), HC reaches <strong>2.682</strong> and Full AttnRes <strong>2.702</strong>.</p>
+          <p>HC and Full AttnRes do the opposite. Full AttnRes steadily improves from <strong>2.751 at L = 16 to 2.718 at L = 32</strong>, and HC from <strong>2.729 at L = 16 to 2.699 at L = 32</strong>. Pushed further, both <strong>keep improving even at an extreme aspect ratio of 9.1</strong> with <span class="math">\(d_\text{model} = 640\)</span> and <span class="math">\(n_\text{layer} = 70\)</span>: HC reaches <strong>2.682</strong> and Full AttnRes <strong>2.702</strong>.</p>
         </div>
 
-        <div class="stat-row">
-          <div><strong>+0.023</strong><span>Pre-LN loss, L16 → L32</span></div>
-          <div><strong>−0.033</strong><span>Full AttnRes loss, L16 → L32</span></div>
-          <div><strong>2.682</strong><span>HC at 70 layers (d/L = 9.1)</span></div>
-        </div>
 
         <figure class="figure-card chart-card">
           <div class="figure-topline">
@@ -208,7 +203,7 @@
               <button type="button" data-range="ext" aria-pressed="false">+ extreme depth</button>
             </div>
           </div>
-          <svg id="loss-chart" viewBox="0 0 1040 420" role="img" aria-label="Validation loss versus aspect ratio for 10 architectures"></svg>
+          <svg id="loss-chart" viewBox="0 0 760 420" role="img" aria-label="Validation loss versus aspect ratio for 10 architectures"></svg>
           <div id="legend" class="legend" aria-label="Toggle architectures"></div>
           <figcaption>Click an architecture to highlight it. The x-axis follows the paper: aspect ratio d / L grows from left (deeper – narrower) to right (shallower – wider). “+ extreme depth” adds the 42- and 70-layer shapes, which were trained for Pre-LN only up to L = 32 in this setting. Values are read from Figure 2.</figcaption>
         </figure>

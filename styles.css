@@ -212,7 +212,7 @@ tr.highlight td { background: var(--accent-pale); color: var(--accent-deep); fon
 .stat-row span { display: block; font: 12px/1.6 var(--sans); color: var(--soft); margin-top: 8px; padding: 0 12px; }
 
 /* ---------- interactive chart ---------- */
-.chart-card #loss-chart { width: 100%; height: auto; display: block; font-family: var(--sans); }
+.chart-card #loss-chart { width: 100%; max-width: 760px; height: auto; display: block; margin: 0 auto; font-family: var(--sans); }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 18px; padding: 3px; background: var(--paper); }
 .seg button { border: 0; background: transparent; padding: 5px 13px; border-radius: 14px; font: 500 12px/1.4 var(--sans); color: var(--soft); }
 .seg button[aria-pressed="true"] { background: #fff; color: var(--accent); box-shadow: 0 1px 3px rgba(20, 30, 60, .12); }
