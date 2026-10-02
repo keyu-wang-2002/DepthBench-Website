@@ -303,7 +303,7 @@
         </figure>
 
         <details class="disclosure">
-          <summary>Why do Block AttnRes and mHC lose the depth benefit? <span aria-hidden="true">+</span></summary>
+          <summary>Potential Hidden Cost for mHC and Block AttnRes <span aria-hidden="true">+</span></summary>
           <div class="disclosure-body">
             <p><strong>Block AttnRes.</strong> Before the first block output is saved, the depth-mixing softmax gives almost no weight to the running sum, so early layers keep re-reading the embedding. This dead segment grows with depth (2, 5 and 8 layers at L = 16, 24, 32) — a quarter of the 32-layer network cannot benefit from stacking layers.</p>
             <figure class="figure-card"><a class="figure-zoom" href="assets/figures/fig9.png" aria-label="Enlarge Figure 9"><img src="assets/figures/fig9.png" width="1716" height="445" loading="lazy" alt="Block AttnRes depth-mixing weights at L = 16, 24, 32."></a></figure>
