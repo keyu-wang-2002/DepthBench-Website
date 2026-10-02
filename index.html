@@ -60,7 +60,7 @@
       <figure class="figure-card">
         <div class="figure-topline"><span class="small-label">DepthBench at a glance</span><a href="assets/media/depthbench-short.mp4" target="_blank" rel="noopener">Open video ↗</a></div>
         <video class="teaser-video" src="assets/media/depthbench-short.mp4" poster="assets/media/short-poster.jpg" autoplay muted loop playsinline aria-label="Animation: a model morphs from 16 wide layers to 70 narrow layers at ≈400M parameters while validation-loss curves are drawn for Pre-LN, Full AttnRes and HC."></video>
-        <figcaption><strong>Same parameters, different shape.</strong> Trading width for depth at ≈400M parameters, Pre-LN gets worse as the model becomes deeper and narrower, while HC and Full AttnRes keep improving — all the way to 70 layers.</figcaption>
+        <figcaption><strong>Same parameters, different shape.</strong> Trading width for depth at ≈400M parameters, Pre-LN gets worse as the model becomes deeper and narrower, while HC and Full AttnRes keep improving, even at an extreme aspect ratio of 9.1 with <span class="math">\(d_\text{model} = 640\)</span> and <span class="math">\(n_\text{layer} = 70\)</span>.</figcaption>
       </figure>
       <div class="study-strip">
         <div><strong>10</strong><span>residual &amp; norm designs</span></div>
@@ -76,7 +76,7 @@
         <h2>More layers.<br>But more computation?</h2>
         <div class="tldr">
           <span class="small-label">TL;DR</span>
-          <p>At a fixed parameter budget, making Transformers deeper and narrower hurts Pre-LN and most of its normalization variants, but consistently helps <strong>HC and Full AttnRes</strong> — even at 70 layers. Residual connection design decides whether depth is a real scaling axis.</p>
+          <p>At a fixed parameter budget, making Transformers deeper and narrower hurts Pre-LN and most of its normalization variants, but consistently helps <strong>HC and Full AttnRes</strong>, even at an extreme aspect ratio of 9.1 with <span class="math">\(d_\text{model} = 640\)</span> and <span class="math">\(n_\text{layer} = 70\)</span>. Residual connection design decides whether depth is a real scaling axis.</p>
         </div>
         <p>Depth is a natural way to increase the computational capacity of Transformers, yet the contribution of deeper layers can diminish as depth grows larger. Recent approaches enhance normalization (e.g., LayerNorm Scaling) or residual connections (e.g., mHC, AttnRes) to enable better information flow and depth utilization. However, it remains unclear whether they truly translate increased architectural depth into effective computational depth, and whether their reported gains stem from better access to information across depth, or from unaccounted-for confounding factors.</p>
         <p>We introduce <strong>DepthBench</strong>, a controlled benchmark for studying computational depth across architectures. We systematically vary the width–depth aspect ratio (<span class="math">\(d_\text{model}/n_\text{layer}\)</span>) from shallow–wide to deep–narrow shapes, while keeping the model size and pre-training recipe fixed.</p>
