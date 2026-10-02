@@ -294,12 +294,12 @@
         <figure class="figure-card">
           <div class="figure-topline"><span class="small-label">Figure 7 · Explicit residual-path weights</span></div>
           <a class="figure-zoom" href="assets/figures/fig7.png" aria-label="Enlarge Figure 7"><img src="assets/figures/fig7.png" width="1716" height="539" loading="lazy" alt="Residual path weight maps for Pre-LN, Full AttnRes and HC."></a>
-          <figcaption>Each cell is the mixing weight of sublayer output <span class="math">\(f_i\)</span> in the input of a later sublayer <span class="math">\(\ell\)</span>. Pre-LN weights every earlier output equally; Full AttnRes and HC learn structured, long-range routes.</figcaption>
+          <figcaption><p><strong>Figure 7. Explicit residual-path weights <span class="math">\(w_{i\to\ell}\)</span>.</strong> Each cell shows the mixing weight of sublayer output <span class="math">\(f_i\)</span> to the pre-norm input of a later sublayer <span class="math">\(\ell\)</span>, averaged over validation calibration tokens. <strong>(a) Pre-LN:</strong> <span class="math">\(w_{i\to\ell} \equiv 1\)</span>. <strong>(b) Full AttnRes:</strong> <span class="math">\(w_{i\to\ell}\)</span> is the per-token softmax weight on <span class="math">\(f_i\)</span>. <strong>(c) HC:</strong> <span class="math">\(w_{i\to\ell} = \beta_i^\top A_{i+1}\cdots A_{\ell-1}\alpha_\ell\)</span>, combining write mappings, residual mappings, and read mappings.</p><p>Pre-LN weights every earlier output equally; Full AttnRes and HC learn structured, long-range routes.</p></figcaption>
         </figure>
         <figure class="figure-card">
           <div class="figure-topline"><span class="small-label">Figure 8 · Layer pruning and LogitLens</span></div>
           <a class="figure-zoom" href="assets/figures/fig8.png" aria-label="Enlarge Figure 8"><img src="assets/figures/fig8.png" width="1716" height="531" loading="lazy" alt="Performance drop after removing single layers, and KL divergence between intermediate and final predictions."></a>
-          <figcaption>Full AttnRes is sensitive to pruning across a broader range of layers and approaches its final prediction non-monotonically, consistent with continued retrieval and late integration of earlier sources.</figcaption>
+          <figcaption><p><strong>Figure 8.</strong> <strong>Left:</strong> Performance drop after removing a single layer. <strong>Right:</strong> The KL divergence between layerwise and final prediction distributions.</p><p>Full AttnRes is sensitive to pruning across a broader range of layers and approaches its final prediction non-monotonically, consistent with continued retrieval and late integration of earlier sources.</p></figcaption>
         </figure>
 
         <details class="disclosure">
