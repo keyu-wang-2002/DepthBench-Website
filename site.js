@@ -21,13 +21,19 @@ const SHAPES = [
 const stack = document.querySelector("#shape-stack");
 const slider = document.querySelector("#shape-slider");
 if (stack && slider) {
-  const H = 210, TOP = 22, PITCH = H / 70, BAR = PITCH * 0.7, CX = 180;
+  const H = 210, TOP = 22, PITCH = H / 70, BAR = PITCH * 0.7, CX = 198;
   const bars = [];
   for (let i = 0; i < 70; i++) bars.push(el("rect", { rx: 1, fill: "#3063ca", stroke: "none" }, stack));
   const label = el("text", { "text-anchor": "middle", "font-size": 12, fill: "#50565f", stroke: "none", "font-family": "-apple-system, sans-serif" }, stack);
+  // vertical double arrow for depth L
+  const defs = el("defs", {}, stack);
+  const mk = el("marker", { id: "depth-ah", viewBox: "0 0 8 8", refX: 6, refY: 4, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
+  el("path", { d: "M1,1 L6,4 L1,7", fill: "none", stroke: "#50565f", "stroke-width": 1.3 }, mk);
+  const vline = el("line", { stroke: "#50565f", "stroke-width": 1.2, "marker-start": "url(#depth-ah)", "marker-end": "url(#depth-ah)" }, stack);
+  const vlabel = el("text", { "text-anchor": "middle", "font-size": 12, fill: "#50565f", stroke: "none", "font-family": "-apple-system, sans-serif" }, stack);
   let cur = { L: 24, d: 1024 }, raf = null;
   function draw(L, d) {
-    const W = (d / 1216) * 330, n = Math.ceil(L - 1e-6), fr = L - Math.floor(L);
+    const W = (d / 1216) * 300, n = Math.ceil(L - 1e-6), fr = L - Math.floor(L);
     bars.forEach((r, j) => {
       if (j < n) {
         r.setAttribute("x", CX - W / 2); r.setAttribute("width", W);
@@ -37,6 +43,11 @@ if (stack && slider) {
     });
     label.setAttribute("x", CX); label.setAttribute("y", TOP + H - L * PITCH - 8);
     label.textContent = `← d = ${Math.round(d)} →`;
+    const top = TOP + H - n * PITCH + (PITCH - BAR), bottom = TOP + H, vx = CX - W / 2 - 12, vy = (top + bottom) / 2;
+    vline.setAttribute("x1", vx); vline.setAttribute("x2", vx); vline.setAttribute("y1", top); vline.setAttribute("y2", bottom);
+    vlabel.setAttribute("x", vx - 8); vlabel.setAttribute("y", vy);
+    vlabel.setAttribute("transform", `rotate(-90 ${vx - 8} ${vy})`);
+    vlabel.textContent = `L = ${Math.round(L)}`;
   }
   function update(animate) {
     const s = SHAPES[Number(slider.value)];
