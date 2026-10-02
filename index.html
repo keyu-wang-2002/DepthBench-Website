@@ -197,21 +197,30 @@
 
         <figure class="figure-card chart-card">
           <div class="figure-topline">
-            <span class="small-label">Interactive · validation loss at ≈400M</span>
-            <div class="seg" role="group" aria-label="Range of shapes">
-              <button type="button" data-range="main" aria-pressed="true">L16 – L32</button>
-              <button type="button" data-range="ext" aria-pressed="false">+ extreme depth</button>
+            <span class="small-label" id="chart-title">Interactive · validation loss at ≈400M</span>
+          </div>
+          <div class="view-switch">
+            <div class="seg-group"><span class="seg-label">Validation loss</span>
+              <div class="seg" role="group" aria-label="Validation loss views">
+                <button type="button" data-view="main" aria-pressed="true">L16 – L32</button>
+                <button type="button" data-view="ext" aria-pressed="false">+ extreme depth</button>
+                <button type="button" data-view="backbone" aria-pressed="false">Fixed 300M backbone</button>
+              </div>
+            </div>
+            <div class="seg-group"><span class="seg-label">Downstream NLL</span>
+              <div class="seg" role="group" aria-label="Downstream NLL views">
+                <button type="button" data-view="coding" aria-pressed="false">Coding</button>
+                <button type="button" data-view="stem" aria-pressed="false">STEM</button>
+                <button type="button" data-view="math" aria-pressed="false">Math</button>
+              </div>
             </div>
           </div>
-          <svg id="loss-chart" viewBox="0 0 760 420" role="img" aria-label="Validation loss versus aspect ratio for 10 architectures"></svg>
+          <svg id="loss-chart" viewBox="0 0 760 420" role="img" aria-label="Interactive chart of validation loss and downstream NLL versus aspect ratio"></svg>
           <div id="legend" class="legend" aria-label="Toggle architectures"></div>
-          <figcaption>Click an architecture to highlight it. The x-axis follows the paper: aspect ratio d / L grows from left (deeper – narrower) to right (shallower – wider). “+ extreme depth” adds the 42- and 70-layer shapes, which were trained for Pre-LN only up to L = 32 in this setting.</figcaption>
-        </figure>
-
-        <figure class="figure-card">
-          <div class="figure-topline"><span class="small-label">Figure 2 · Fixed total vs. fixed backbone size</span><a href="https://arxiv.org/pdf/2609.32534" target="_blank" rel="noopener">Paper PDF ↗</a></div>
-          <a class="figure-zoom" href="assets/figures/fig2.png" aria-label="Enlarge Figure 2"><img src="assets/figures/fig2.png" width="1716" height="797" loading="lazy" alt="Validation loss across aspect ratios for 10 architectures at 400M, plus extended shapes at fixed total and fixed backbone size."></a>
-          <figcaption><p>We further extend the scaling range, up to 70 layers. As shown in Figure 2 (b-c), the favorable trend persists in both fixing total size and backbone size. Notably, with the backbone size fixed, deep–narrow models improve even as the total size decreases. This suggests that their depth-scaling gains arise from the width–depth allocation itself rather than simply from increased backbone size. Overall, HC and Full AttnRes are exceptionally well suited to depth scaling, with performance continuing to improve as models are pushed toward increasingly deep–narrow, even extreme, shapes.</p><p><strong>The favorable width-depth scaling behavior of HC and Full AttnRes is less evident in their derived variants, Block AttnRes and mHC.</strong> As shown in Figure 2 (a), Block AttnRes remains competitive but performs best at an intermediate shape, reaching 2.715 at L = 20 before degrading to 2.730 at L = 32. Similarly, mHC achieves strong overall performance and its best performance at L = 24 but shows no consistent gain with increasing depth.</p></figcaption>
+          <figcaption>
+            <p id="chart-note"></p>
+            <p class="chart-hint">Click an architecture to highlight it. The x-axis follows the paper: aspect ratio d / L grows from left (deeper – narrower) to right (shallower – wider).</p>
+          </figcaption>
         </figure>
 
         <div class="figure-stack">
@@ -219,11 +228,6 @@
             <div class="figure-topline"><span class="small-label">Figure 3 · Across scales</span></div>
             <a class="figure-zoom" href="assets/figures/fig3.png" aria-label="Enlarge Figure 3"><img src="assets/figures/fig3.png" width="1723" height="542" loading="lazy" alt="Validation loss for Pre-LN, Full AttnRes and HC across 200M–500M and at 1.6B."></a>
             <figcaption><p><strong>A wide range of scales coupled with domain-specific evaluation shows the consistent trend.</strong> As shown in Figure 3, across 200M–500M models, Full AttnRes consistently benefits from deeper–narrower shapes, and this trend persists at 1.6B, suggesting that its favorable depth scaling extends beyond the 400M regime. HC shows a similar trend at smaller scales, but exhibits less stable behavior as scale increases: the 500M run at the largest aspect ratio encounters gradient explosion, while the 1.6B results do not show the same clear improvement with depth. The reason is that HC is more sensitive to optimization hyperparameters and may require finer learning-rate tuning across scales, consistent with the motivation of mHC to improve the large-scale optimization stability of unconstrained HC (Zhu et al., 2025; Xie et al., 2025).</p></figcaption>
-          </figure>
-          <figure class="figure-card">
-            <div class="figure-topline"><span class="small-label">Figure 4 · Beyond pre-training loss</span></div>
-            <a class="figure-zoom" href="assets/figures/fig4.png" aria-label="Enlarge Figure 4"><img src="assets/figures/fig4.png" width="1716" height="609" loading="lazy" alt="NLL on coding, STEM and math tasks across aspect ratios."></a>
-            <figcaption><p>As shown in Figure 4, deeper HC and Full AttnRes models generally achieve lower NLL across coding, STEM, and math evaluations. The trend is particularly clear for STEM and math, where both architectures consistently improve as capacity is shifted toward depth. In contrast, Pre-LN and most other variants show weaker or non-monotonic trends. These results suggest that the favorable width-depth scaling translates to domain-specific predictive capability rather than only lower held-out pre-training loss.</p></figcaption>
           </figure>
         </div>
       </div>
